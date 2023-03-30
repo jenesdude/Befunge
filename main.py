@@ -214,11 +214,14 @@ def read_program(file_name):
         with open(file_name, "r", encoding="utf-8") as file:
             rows = file.read().split("\n")
             height = len(rows)
+            if height > 25:
+                return 3, "Количество строк кода больше 25"
             width = len(rows[0])
+            if width > 80:
+                return 4, "Количество столбцов кода больше 80"
             for row in rows:
                 if len(row) != width:
-                    print("Код не является прямоугольным полем!")
-                    return 1, "Код не является прямоугольным полем!"
+                    return 2, "Код не является прямоугольным полем"
             return 0, height, width, rows
     except FileNotFoundError:
         return 1, "Файл кода отсутствует"
@@ -226,12 +229,16 @@ def read_program(file_name):
 
 def main():
     program_text = read_program(r"Scripts\hello_world.txt")
-    grid = BefungeGrid(*program_text[1:])
-    # grid = BefungeGrid(*read_program(r"Scripts\loop.txt"))
-    # grid = BefungeGrid(*read_program(r"Scripts\quine.txt"))
-    # grid = BefungeGrid(*read_program(r"Scripts\cat.txt"))
-    grid.run()
-    # grid.run(True)
+    # program_text = read_program(r"Scripts\loop.txt")
+    # program_text = read_program(r"Scripts\cat.txt")
+    # program_text = read_program(r"Scripts\exception_width.txt")
+    # program_text = read_program(r"Scripts\exception_height.txt")
+    if program_text[0]:
+        print(program_text[1])
+    else:
+        grid = BefungeGrid(*program_text[1:])
+        grid.run()
+        # grid.run(True)
 
 
 if __name__ == "__main__":
