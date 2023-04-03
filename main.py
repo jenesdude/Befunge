@@ -3,6 +3,7 @@ Stack contains only int numbers"""
 
 from random import choice
 from typing import List
+from exceptions import *
 
 
 class BefungeGrid:
@@ -181,13 +182,13 @@ class BefungeGrid:
                 value = self.stack.pop()
                 self.move_direction = "^" if value else "v"
             except IndexError:
-                print("The stack doesn't have enough elements for |")
+                raise NotEnoughElementsInStackError(self) from None
         elif command == "_":
             try:
                 value = self.stack.pop()
                 self.move_direction = "<" if value else ">"
             except IndexError:
-                print("The stack doesn't have enough elements for _")
+                raise NotEnoughElementsInStackError(self) from None
         elif command == "#":
             self._move()
         else:
@@ -214,25 +215,24 @@ def read_program(file_name):
         with open(file_name, "r", encoding="utf-8") as file:
             rows = file.read().split("\n")
             height = len(rows)
-            if height > 25:
-                return 3, "Количество строк кода больше 25"
             width = len(rows[0])
-            if width > 80:
-                return 4, "Количество столбцов кода больше 80"
+            if height > 25 or width > 80:
+                raise CodeFileIsOutOfBoundsError
             for row in rows:
                 if len(row) != width:
-                    return 2, "Код не является прямоугольным полем"
+                    raise CodeFileIsNotRectangleError
             return 0, height, width, rows
     except FileNotFoundError:
-        return 1, "Файл кода отсутствует"
+        raise CodeFileNotFoundError from None
 
 
 def main():
-    program_text = read_program(r"Scripts\hello_world.txt")
+    # program_text = read_program(r"Scripts\hello_world.txt")
     # program_text = read_program(r"Scripts\loop.txt")
     # program_text = read_program(r"Scripts\cat.txt")
     # program_text = read_program(r"Scripts\exception_width.txt")
     # program_text = read_program(r"Scripts\exception_height.txt")
+    program_text = read_program(r"Scripts\empty_stack.txt")
     if program_text[0]:
         print(program_text[1])
     else:
