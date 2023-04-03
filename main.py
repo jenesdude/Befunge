@@ -227,12 +227,12 @@ def read_program(file_name):
 
 
 def main():
-    # program_text = read_program(r"Scripts\hello_world.txt")
+    program_text = read_program(r"Scripts\hello_world.txt")
     # program_text = read_program(r"Scripts\loop.txt")
     # program_text = read_program(r"Scripts\cat.txt")
     # program_text = read_program(r"Scripts\exception_width.txt")
     # program_text = read_program(r"Scripts\exception_height.txt")
-    program_text = read_program(r"Scripts\empty_stack.txt")
+    # program_text = read_program(r"Scripts\empty_stack.txt")
     if program_text[0]:
         print(program_text[1])
     else:
