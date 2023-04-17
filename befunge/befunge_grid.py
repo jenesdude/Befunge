@@ -21,7 +21,9 @@ class BefungeGrid:
         self.string_mode = False
 
     def set_grid(self, mode="f", source=None):
-        """Method for setting the grid. Mode f is for reading file. Mode s is for list of strings.
+        """Method for setting the grid.
+        Mode 'f' is for reading file.
+        Mode 's' is for list of strings.
         Method also resets y and x variables to zero"""
         if mode == "f":
             try:
@@ -53,7 +55,8 @@ class BefungeGrid:
         """Main method for evaluation code of befunge.
         Code is any rectangular less or equal to 25×80 text block"""
         if debug:
-            print("evaluate command [ {} ] at Y: {} X: {}, string mode: {}, stack: [ {} ]".format
+            print("evaluate command [ {} ] at Y: {} X: {},"
+                  " string mode: {}, stack: [ {} ]".format
                   (command,
                    str(self.y + 1),
                    str(self.x + 1),
@@ -79,14 +82,19 @@ class BefungeGrid:
         elif command == "@":
             return False
         else:
-            print("Invalid operand [", command, "] at", self.y + 1, "row,", self.x + 1, "column")
+            print("Invalid operand [", command, "] at",
+                  self.y + 1, "row,", self.x + 1, "column")
             return False
         self._move()
         return True
 
     def run(self, debug=False):
         """Endless loop of program interpretation
-        If debug=True, every command prints current command, coordinates, string mode and full stack"""
+        If debug=True, every command prints:
+         - current command,
+         - coordinates,
+         - string mode
+         - full stack"""
         if self.grid is None:
             raise GridIsNotDefinedError
         while True:
@@ -109,14 +117,16 @@ class BefungeGrid:
             self.stack.append(ord(input_string[0]))
 
     def _put(self):
-        """Inner method for popping y, x and v from stack.
-        After that changing the character at y, x to the character with ASCII value v,
-        considering start of numeration is 1."""
+        """Inner method for stack 'put' command.
+        Popping y, x and value from stack, changing the character at y, x
+        to the character with ASCII value v, taking numeration start on 1."""
         try:
             get_y = int(self.stack.pop())
             get_x = int(self.stack.pop())
             value = int(self.stack.pop())
-            self.grid[get_y - 1] = self.grid[get_y - 1][:get_x - 1] + chr(value) + self.grid[get_y - 1][get_x:]
+            left_part = self.grid[get_y - 1][:get_x - 1]
+            right_part = self.grid[get_y - 1][get_x:]
+            self.grid[get_y - 1] = left_part + chr(value) + right_part
         except IndexError:
             self.grid[0] = "0" + self.grid[0][1:]
 

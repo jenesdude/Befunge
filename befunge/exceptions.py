@@ -10,7 +10,8 @@ class CodeFileIsOutOfBoundsError(Exception):
     """Exception raised for code file width or height is out of 25×80 bounds"""
 
     def __init__(self):
-        self.message = "The befunge code file width or height is out of 25×80 bounds"
+        self.message = "The befunge code file width or height" \
+                       "is out of 25×80 bounds"
         super().__init__(self.message)
 
 
@@ -34,7 +35,8 @@ class WrongSetGridModeError(Exception):
     """Exception raised for using wrong setting grid mode"""
 
     def __init__(self):
-        self.message = "The grid setting mode is wrong, should be 'f' for files or 's' for string list"
+        self.message = "The grid setting mode is wrong, should be" \
+                       "'f' for files or 's' for string list"
         super().__init__(self.message)
 
 
@@ -43,11 +45,18 @@ class BefungeError(Exception):
 
     def __init__(self, message, grid):
         command = grid.grid[grid.y][grid.x]
-        super().__init__(message + " [ " + command + " ] at Y:" + str(grid.y) + ", X:" + str(grid.x))
+        super().__init__(message
+                         + " [ "
+                         + command
+                         + " ] at Y:"
+                         + str(grid.y)
+                         + ", X:"
+                         + str(grid.x))
 
 
 class NotEnoughElementsInStackError(BefungeError):
-    """Exception raised for executing commands that require more arguments than there are in stack"""
+    """Exception raised for executing commands
+    that require more arguments than there are in stack"""
 
     def __init__(self, grid):
         self.message = "The stack doesn't have enough elements for command"
