@@ -20,11 +20,9 @@ class BefungeGrid:
         self.move_direction = ">"
         self.string_mode = False
 
-    def set_grid(self, mode="f", source=None):
-        """Method for setting the grid.
-        Mode 'f' is for reading file.
-        Mode 's' is for list of strings.
-        Method also resets y and x variables to zero"""
+    @staticmethod
+    def _read_source(mode="f", source=None):
+        """Inner method for reading source. Either file or list of strings"""
         if mode == "f":
             try:
                 with open(source, "r", encoding="utf-8") as file:
@@ -34,11 +32,21 @@ class BefungeGrid:
             except FileNotFoundError:
                 raise CodeFileNotFoundError from None
         elif mode == "s":
+            if type(source) != list:
+                raise CodeSourceIsNotStringListError from None
             rows = source
             height = len(rows)
             width = len(rows[0])
         else:
             raise WrongSetGridModeError
+        return rows, height, width
+
+    def set_grid(self, mode="f", source=None):
+        """Method for setting the grid.
+        Mode 'f' is for reading file.
+        Mode 's' is for list of strings.
+        Method also resets y and x variables to zero"""
+        rows, height, width = self._read_source(mode, source)
         if height > 25 or width > 80:
             raise CodeFileIsOutOfBoundsError
         for row in rows:
@@ -82,8 +90,8 @@ class BefungeGrid:
         elif command == "@":
             return False
         else:
-            print("Invalid operand [", command, "] at",
-                  self.y + 1, "row,", self.x + 1, "column")
+            print(f"Invalid operand [ {command} ] "
+                  f"at {self.y + 1} row, {self.x + 1} column")
             return False
         self._move()
         return True
@@ -134,9 +142,7 @@ class BefungeGrid:
         """Inner method for getting value from top two coordinates from stack"""
         try:
             get_y = self.stack.pop()
-            print(get_y)
             get_x = self.stack.pop()
-            print(get_x)
             self.stack.append(ord(self.grid[get_y][get_x]))
         except IndexError:
             self.stack.append(0)

@@ -31,6 +31,15 @@ class GridIsNotDefinedError(Exception):
         super().__init__(self.message)
 
 
+class CodeSourceIsNotStringListError(Exception):
+    """Exception raised for any input other than list of strings
+    while reading source in 's' mode"""
+
+    def __init__(self):
+        self.message = "Code source is not list of string for mode 's'"
+        super().__init__(self.message)
+
+
 class WrongSetGridModeError(Exception):
     """Exception raised for using wrong setting grid mode"""
 
@@ -45,13 +54,8 @@ class BefungeError(Exception):
 
     def __init__(self, message, grid):
         command = grid.grid[grid.y][grid.x]
-        super().__init__(message
-                         + " [ "
-                         + command
-                         + " ] at Y:"
-                         + str(grid.y)
-                         + ", X:"
-                         + str(grid.x))
+        super().__init__(f"{message} [ {command} ] at Y: {str(grid.y)},"
+                         f"X:{str(grid.x)}")
 
 
 class NotEnoughElementsInStackError(BefungeError):

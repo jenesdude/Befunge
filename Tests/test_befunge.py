@@ -1,3 +1,4 @@
+import pytest
 from befunge import befunge_grid
 
 
@@ -34,114 +35,49 @@ def test_numbers_into_stack():
     assert [1, 2, 3] == grid.stack
 
 
-def test_arithmetic_commands_empty_stack():
+@pytest.mark.parametrize("test_input,expected",
+                         [(["23-@"], 1),
+                          (["-@"], 0),
+                          (["*@"], 0),
+                          (["26/@"], 3),
+                          (["/@"], 0),
+                          (["03/@"], 0),
+                          (["49%@"], 1),
+                          (["%@"], 0),
+                          (["00%@"], 0),
+                          (["1!@"], 0),
+                          (["0!@"], 1),
+                          (["!@"], 0),
+                          (["12`@"], 0),
+                          (["21`@"], 1),
+                          (["`@"], 0)])
+def test_arithmetic_commands_result_on_top_of_the_stack(test_input, expected):
     grid = befunge_grid.BefungeGrid()
-    grid.set_grid("s", ["+@"])
+    string_list = test_input
+    grid.set_grid("s", string_list)
     grid.run()
-    assert grid.stack[0] == 0
+    assert grid.stack[-1] == expected
 
-    grid.set_grid("s", ["23-@"])
+
+@pytest.mark.parametrize("test_input,expected",
+                         [(["+@"], [0]),
+                          (["1:@"], [1, 1]),
+                          ([":@"], [0, 0]),
+                          (["12\\@"], [2, 1]),
+                          (["\\@"], [0, 0]),
+                          (["1$@"], []),
+                          (["$@"], [])])
+def test_arithmetic_commands_result_full_stack(test_input, expected):
+    grid = befunge_grid.BefungeGrid()
+    string_list = test_input
+    grid.set_grid("s", string_list)
     grid.run()
-    assert grid.stack[-1] == 1
-
-    grid.set_grid("s", ["-@"])
-    grid.run()
-    assert grid.stack[-1] == 0
-
-    grid.set_grid("s", ["*@"])
-    grid.run()
-    assert grid.stack[-1] == 0
-
-    grid.set_grid("s", ["26/@"])
-    grid.run()
-    assert grid.stack[-1] == 3
-
-    grid.set_grid("s", ["/@"])
-    grid.run()
-    assert grid.stack[-1] == 0
-
-    grid.set_grid("s", ["03/@"])
-    grid.run()
-    assert grid.stack[-1] == 0
-
-    grid.set_grid("s", ["49%@"])
-    grid.run()
-    assert grid.stack[-1] == 1
-
-    grid.set_grid("s", ["%@"])
-    grid.run()
-    assert grid.stack[-1] == 0
-
-    grid.set_grid("s", ["00%@"])
-    grid.run()
-    assert grid.stack[-1] == 0
-
-    grid.set_grid("s", ["1!@"])
-    grid.run()
-    assert grid.stack[-1] == 0
-
-    grid.set_grid("s", ["0!@"])
-    grid.run()
-    assert grid.stack[-1] == 1
-
-    grid.set_grid("s", ["!@"])
-    grid.run()
-    assert grid.stack[-1] == 0
-
-    grid.set_grid("s", ["1:@"])
-    grid.run()
-    assert grid.stack == [1, 1]
-
-    grid.set_grid("s", [":@"])
-    grid.run()
-    assert grid.stack == [0, 0]
-
-    grid.set_grid("s", ["12`@"])
-    grid.run()
-    assert grid.stack[-1] == 0
-
-    grid.set_grid("s", ["21`@"])
-    grid.run()
-    assert grid.stack[-1] == 1
-
-    grid.set_grid("s", ["`@"])
-    grid.run()
-    assert grid.stack[-1] == 0
-
-    grid.set_grid("s", ["12\\@"])
-    grid.run()
-    assert grid.stack == [2, 1]
-
-    grid.set_grid("s", ["\\@"])
-    grid.run()
-    assert grid.stack == [0, 0]
-
-    grid.set_grid("s", ["1$@"])
-    grid.run()
-    assert grid.stack == []
-
-    grid.set_grid("s", ["$@"])
-    grid.run()
-    assert grid.stack == []
-
-    # grid.set_grid("s", ["?@", "@ "])
-    # grid.run()
-    # assert (grid.y == 0 and grid.x == 1) or (grid.y == 1 and grid.x == 0)
-
-    # grid.set_grid("s", ["1|", " @"])
-    # grid.run()
-    # assert grid.y == 1
-    # assert grid.x == 1
-
-    # grid.set_grid("s", ["0|", " @", "  "])
-    # grid.run()
-    # assert grid.y == 1
-    # assert grid.x == 1
+    assert grid.stack == expected
 
 
 def test_sharp_command():
     grid = befunge_grid.BefungeGrid()
-    grid.set_grid("s", ["#@v", "  @"])  # end in # at the second string
+    grid.set_grid("s", ["#@v", "  @"])
     grid.run()
     assert grid.y == 1
     assert grid.x == 2
@@ -224,37 +160,27 @@ def test_get_command_empty_stack():
     assert grid.stack[-1] == 0
 
 
-def test_move_right():
+@pytest.mark.parametrize("test_input,expected",
+                         [([">@"], [1, 0]),
+                          (["^ ", "@ "], [0, 1]),
+                          (["<@"], [1, 0]),
+                          (["v ", "@ "], [0, 1]),
+                          (["1|", " @", " @"], [1, 2]),
+                          (["0|", " @", " @"], [1, 1]),
+                          (["1v ", "@_@"], [0, 1]),
+                          (["0v ", "@_@"], [2, 1])])
+def test_moving(test_input, expected):
     grid = befunge_grid.BefungeGrid()
-    string_list = [">@"]
+    string_list = test_input
     grid.set_grid("s", string_list)
     grid.run()
-    assert grid.x == 1
-    assert grid.y == 0
+    assert grid.x == expected[0]
+    assert grid.y == expected[1]
 
 
-def test_move_up():
+def test_random_moving():
     grid = befunge_grid.BefungeGrid()
-    string_list = ["^ ", "@ "]
+    string_list = ["?@", "@ "]
     grid.set_grid("s", string_list)
     grid.run()
-    assert grid.x == 0
-    assert grid.y == 1
-
-
-def test_move_left():
-    grid = befunge_grid.BefungeGrid()
-    string_list = ["<@"]
-    grid.set_grid("s", string_list)
-    grid.run()
-    assert grid.x == 1
-    assert grid.y == 0
-
-
-def test_move_down():
-    grid = befunge_grid.BefungeGrid()
-    string_list = ["v ", "@ "]
-    grid.set_grid("s", string_list)
-    grid.run()
-    assert grid.x == 0
-    assert grid.y == 1
+    assert (grid.x == 0 and grid.y == 1) or (grid.x == 1 and grid.y == 0)

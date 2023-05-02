@@ -43,8 +43,18 @@ def test_raise_wrong_set_grid_error_letter():
         grid.set_grid("z", "any_file.txt")
 
 
-def test_raise_not_enough_elements_in_stack_error():
-    with pytest.raises(exceptions.NotEnoughElementsInStackError):
+def test_raise_code_source_is_not_string_list_error():
+    """Testing string as an argument for 's' reading source mode"""
+    with pytest.raises(exceptions.CodeSourceIsNotStringListError):
         grid = befunge_grid.BefungeGrid()
-        grid.set_grid("f", r"Tests/Code_files/not_enough_elements_in_stack.txt")
+        grid.set_grid("s", "string, not list of strings")
+
+
+def test_raise_not_enough_elements_in_stack_error():
+    grid = befunge_grid.BefungeGrid()
+    with pytest.raises(exceptions.NotEnoughElementsInStackError):
+        grid.set_grid("s", ["|"])
+        grid.run()
+    with pytest.raises(exceptions.NotEnoughElementsInStackError):
+        grid.set_grid("s", ["_"])
         grid.run()
