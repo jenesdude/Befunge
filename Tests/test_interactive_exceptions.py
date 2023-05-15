@@ -1,27 +1,26 @@
 import pytest
 from io import StringIO
-from befunge import *
-from befunge.interactive_befunge_grid import *
-from befunge.interactive_exceptions import *
+from befunge import interactive_befunge_grid, interactive_exceptions
+from befunge import exceptions
 
 
 def test_grid_is_not_defined_error(monkeypatch):
-    with pytest.raises(IAGridIsNotDefinedError):
-        grid = IABefungeGrid()
+    with pytest.raises(interactive_exceptions.IAGridIsNotDefinedError):
+        grid = interactive_befunge_grid.IABefungeGrid()
         monkeypatch.setattr('sys.stdin', StringIO("\n"))
         grid.run()
 
 
 def test_grid_is_not_rectangle_error(monkeypatch):
-    with pytest.raises(CodeFileIsNotRectangleError):
-        grid = IABefungeGrid()
+    with pytest.raises(exceptions.CodeFileIsNotRectangleError):
+        grid = interactive_befunge_grid.IABefungeGrid()
         monkeypatch.setattr('sys.stdin', StringIO("123v\nv54<\n>>@\n"))
         grid.run()
 
 
 def test_complete_grid_alteration_error(monkeypatch):
-    with pytest.raises(CompleteIAGridAlterationError):
-        grid = IABefungeGrid()
+    with pytest.raises(interactive_exceptions.CompleteIAGridAlterationError):
+        grid = interactive_befunge_grid.IABefungeGrid()
         monkeypatch.setattr('sys.stdin', StringIO(">>v@\n<<<^\n\n"))
         grid.run()
         monkeypatch.setattr('sys.stdin', StringIO("123@\n"))

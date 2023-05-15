@@ -4,6 +4,7 @@ Stack contains only int numbers"""
 from typing import List
 from befunge.befunge_grid import BefungeGrid
 from befunge.interactive_exceptions import *
+from befunge.exceptions import CodeFileIsNotRectangleError
 
 
 class IABefungeGrid(BefungeGrid):
