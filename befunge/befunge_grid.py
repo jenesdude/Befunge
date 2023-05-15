@@ -43,10 +43,13 @@ class BefungeGrid:
 
     def set_grid(self, mode="f", source=None):
         """Method for setting the grid.
-        Mode 'f' is for reading file.
-        Mode 's' is for list of strings.
-        Method also resets y and x variables to zero"""
+        Mode 'f' is for reading file. Mode 's' is for list of strings.
+        Method also resets y and x variables to zero.
+        Code is any rectangular less or equal to 25×80 text block,
+        looped in the shape of a torus."""
         rows, height, width = self._read_source(mode, source)
+        if not width:
+            raise CodeSourceIsEmptyError
         if height > 25 or width > 80:
             raise CodeFileIsOutOfBoundsError
         for row in rows:
@@ -60,8 +63,7 @@ class BefungeGrid:
         self.stack = []
 
     def evaluate(self, command, debug):
-        """Main method for evaluation code of befunge.
-        Code is any rectangular less or equal to 25×80 text block"""
+        """Main method for evaluation code of befunge."""
         if debug:
             print("evaluate command [ {} ] at Y: {} X: {},"
                   " string mode: {}, stack: [ {} ]".format

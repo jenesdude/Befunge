@@ -15,7 +15,9 @@ def test_debug_mode(capfd):
     grid.set_grid("s", string_list)
     grid.run(True)
     out, err = capfd.readouterr()
-    assert out == "evaluate command [ @ ] at Y: 1 X: 1, string mode: False, stack: [  ]\n"
+    debug_out = "evaluate command [ @ ]"\
+                " at Y: 1 X: 1, string mode: False, stack: [  ]\n"
+    assert out == debug_out
     assert err == ""
 
 
@@ -84,6 +86,7 @@ def test_sharp_command():
 
 
 def test_output_dot_command(capfd):
+    """output dot (.) test"""
     grid = befunge_grid.BefungeGrid()
     string_list = ["1.@"]
     grid.set_grid("s", string_list)
@@ -93,6 +96,7 @@ def test_output_dot_command(capfd):
 
 
 def test_output_comma_command(capfd):
+    """output comma (,) test"""
     grid = befunge_grid.BefungeGrid()
     string_list = ["9,@"]  # 9 is a code for tab symbol
     grid.set_grid("s", string_list)
@@ -102,6 +106,7 @@ def test_output_comma_command(capfd):
 
 
 def test_input_ampersand_command(monkeypatch):
+    """input ampersand (&) test"""
     monkeypatch.setattr('builtins.input', lambda: 1)
     grid = befunge_grid.BefungeGrid()
     string_list = ["&@"]
@@ -111,6 +116,7 @@ def test_input_ampersand_command(monkeypatch):
 
 
 def test_input_tilda_command(monkeypatch):
+    """input tilda (~) test"""
     monkeypatch.setattr('builtins.input', lambda: "\t")
     grid = befunge_grid.BefungeGrid()
     string_list = ["~@"]
@@ -120,6 +126,7 @@ def test_input_tilda_command(monkeypatch):
 
 
 def test_invalid_operand(capfd):
+    """output after invalid operand test"""
     grid = befunge_grid.BefungeGrid()
     string_list = ["Z"]
     grid.set_grid("s", string_list)

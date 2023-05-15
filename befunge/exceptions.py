@@ -40,6 +40,15 @@ class CodeSourceIsNotStringListError(Exception):
         super().__init__(self.message)
 
 
+class CodeSourceIsEmptyError(Exception):
+    """Exception raised for any input other than list of strings
+    while reading source in 's' mode"""
+
+    def __init__(self):
+        self.message = "Code source contains empty string"
+        super().__init__(self.message)
+
+
 class WrongSetGridModeError(Exception):
     """Exception raised for using wrong setting grid mode"""
 

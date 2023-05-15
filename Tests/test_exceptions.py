@@ -50,6 +50,13 @@ def test_raise_code_source_is_not_string_list_error():
         grid.set_grid("s", "string, not list of strings")
 
 
+def test_raise_code_source_if_empty_error():
+    """Testing empty string as an argument for 's' reading source mode"""
+    with pytest.raises(exceptions.CodeSourceIsEmptyError):
+        grid = befunge_grid.BefungeGrid()
+        grid.set_grid("s", [""])
+
+
 def test_raise_not_enough_elements_in_stack_error():
     grid = befunge_grid.BefungeGrid()
     with pytest.raises(exceptions.NotEnoughElementsInStackError):
