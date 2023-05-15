@@ -85,24 +85,16 @@ def test_sharp_command():
     assert grid.x == 2
 
 
-def test_output_dot_command(capfd):
-    """output dot (.) test"""
+@pytest.mark.parametrize("test_input,expected",
+                         [(["1.@"], "1 "),   # output dot '.' test
+                          (["9,@"], "\t")])  # output comma ',' test
+def test_output_commands(test_input, expected, capfd):
     grid = befunge_grid.BefungeGrid()
-    string_list = ["1.@"]
+    string_list = test_input
     grid.set_grid("s", string_list)
     grid.run()
     out, err = capfd.readouterr()
-    assert out == "1 "
-
-
-def test_output_comma_command(capfd):
-    """output comma (,) test"""
-    grid = befunge_grid.BefungeGrid()
-    string_list = ["9,@"]  # 9 is a code for tab symbol
-    grid.set_grid("s", string_list)
-    grid.run()
-    out, err = capfd.readouterr()
-    assert out == "\t"
+    assert out == expected
 
 
 def test_input_ampersand_command(monkeypatch):
