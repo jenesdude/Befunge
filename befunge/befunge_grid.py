@@ -1,32 +1,77 @@
-"""Interpreter for esoteric stack language Befunge.
+"""Interpreter for esoteric stack language befunge.
 Stack contains only int numbers"""
 
 from random import choice
 from typing import List
-from exceptions import *
+from befunge.exceptions import *
 
 
 class BefungeGrid:
-    """Class for Befunge grid"""
+    """Class for befunge grid"""
     stack: List[int]
 
-    def __init__(self, height, width, grid):
-        self.code_height = height
-        self.code_width = width
-        self.x = 0
+    def __init__(self):
+        self.code_height = 0
+        self.code_width = 0
         self.y = 0
-        self.grid = grid
+        self.x = 0
+        self.grid = None
         self.stack = []
         self.move_direction = ">"
         self.string_mode = False
 
+    @staticmethod
+    def _read_source(mode="f", source=None):
+        """Inner method for reading source. Either file or list of strings"""
+        if mode == "f":
+            try:
+                with open(source, "r", encoding="utf-8") as file:
+                    rows = file.read().split("\n")
+                    height = len(rows)
+                    width = len(rows[0])
+            except FileNotFoundError:
+                raise CodeFileNotFoundError from None
+        elif mode == "s":
+            if type(source) != list:
+                raise CodeSourceIsNotStringListError from None
+            rows = source
+            height = len(rows)
+            width = len(rows[0])
+        else:
+            raise WrongSetGridModeError
+        return rows, height, width
+
+    def set_grid(self, mode="f", source=None):
+        """Method for setting the grid.
+        Mode 'f' is for reading file. Mode 's' is for list of strings.
+        Method also resets y and x variables to zero.
+        Code is any rectangular less or equal to 25×80 text block,
+        looped in the shape of a torus."""
+        rows, height, width = self._read_source(mode, source)
+        if not width:
+            raise CodeSourceIsEmptyError
+        if height > 25 or width > 80:
+            raise CodeFileIsOutOfBoundsError
+        for row in rows:
+            if len(row) != width:
+                raise CodeFileIsNotRectangleError
+        self.code_height = height
+        self.code_width = width
+        self.y = 0
+        self.x = 0
+        self.grid = rows
+        self.stack = []
+
     def evaluate(self, command, debug):
-        """Main method for evaluation code of Befunge.
-        Code is any rectangular less or equal to 25×80 text block"""
+        """Main method for evaluation code of befunge."""
         if debug:
-            print("evaluate command [", command, "] Y:", self.y + 1, "X:", self.x + 1,
-                  "string mode:", self.string_mode,
-                  "stack: [", ",".join(chr(e) for e in self.stack), "]")
+            print("evaluate command [ {} ] at Y: {} X: {},"
+                  " string mode: {}, stack: [ {} ]".format
+                  (command,
+                   str(self.y + 1),
+                   str(self.x + 1),
+                   str(self.string_mode),
+                   ",".join(str(int(e)) for e in self.stack)))
         if self.string_mode:
             if command == '"':
                 self.string_mode = False
@@ -47,19 +92,25 @@ class BefungeGrid:
         elif command == "@":
             return False
         else:
-            print("Invalid operand [", command, "] at", self.y + 1, "row,", self.x + 1, "column")
+            print(f"Invalid operand [ {command} ] "
+                  f"at {self.y + 1} row, {self.x + 1} column")
             return False
         self._move()
         return True
 
     def run(self, debug=False):
         """Endless loop of program interpretation
-        If debug=True, every command prints current command, coordinates, string mode and full stack"""
+        If debug=True, every command prints:
+         - current command,
+         - coordinates,
+         - string mode
+         - full stack"""
+        if self.grid is None:
+            raise GridIsNotDefinedError
         while True:
             if self.evaluate(self.grid[self.y][self.x], debug):
                 continue
-            else:
-                break
+            break
 
     def _input_output(self, command):
         """Inner method for I/O operations"""
@@ -76,21 +127,25 @@ class BefungeGrid:
             self.stack.append(ord(input_string[0]))
 
     def _put(self):
-        """Inner method for putting value from top two coordinates from stack and a value"""
+        """Inner method for stack 'put' command.
+        Popping y, x and value from stack, changing the character at y, x
+        to the character with ASCII value v, taking numeration start on 1."""
         try:
-            get_y = self.stack.pop()
-            get_x = self.stack.pop()
-            value = self.stack.pop()
-            self.grid[get_y - 1][get_x - 1] = chr(value)
+            get_y = int(self.stack.pop())
+            get_x = int(self.stack.pop())
+            value = int(self.stack.pop())
+            left_part = self.grid[get_y - 1][:get_x - 1]
+            right_part = self.grid[get_y - 1][get_x:]
+            self.grid[get_y - 1] = left_part + chr(value) + right_part
         except IndexError:
-            self.grid[0][0] = chr(0)
+            self.grid[0] = "0" + self.grid[0][1:]
 
     def _get(self):
         """Inner method for getting value from top two coordinates from stack"""
         try:
             get_y = self.stack.pop()
             get_x = self.stack.pop()
-            self.stack.append(self.grid[get_y - 1][get_x - 1])
+            self.stack.append(ord(self.grid[get_y][get_x]))
         except IndexError:
             self.stack.append(0)
 
@@ -206,40 +261,3 @@ class BefungeGrid:
             self.x = self.code_width - 1 if self.x == 0 else self.x - 1
         else:
             pass
-
-
-def read_program(file_name):
-    """Function for reading Befunge source file
-    Problems indicated with 0 return code"""
-    try:
-        with open(file_name, "r", encoding="utf-8") as file:
-            rows = file.read().split("\n")
-            height = len(rows)
-            width = len(rows[0])
-            if height > 25 or width > 80:
-                raise CodeFileIsOutOfBoundsError
-            for row in rows:
-                if len(row) != width:
-                    raise CodeFileIsNotRectangleError
-            return 0, height, width, rows
-    except FileNotFoundError:
-        raise CodeFileNotFoundError from None
-
-
-def main():
-    program_text = read_program(r"Scripts\hello_world.txt")
-    # program_text = read_program(r"Scripts\loop.txt")
-    # program_text = read_program(r"Scripts\cat.txt")
-    # program_text = read_program(r"Scripts\exception_width.txt")
-    # program_text = read_program(r"Scripts\exception_height.txt")
-    # program_text = read_program(r"Scripts\empty_stack.txt")
-    if program_text[0]:
-        print(program_text[1])
-    else:
-        grid = BefungeGrid(*program_text[1:])
-        grid.run()
-        # grid.run(True)
-
-
-if __name__ == "__main__":
-    main()

@@ -1,0 +1,1 @@
+from befunge.exceptions import *
