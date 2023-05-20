@@ -55,6 +55,7 @@ class GridStringAssignmentError(GridAssignmentError):
 
 
 class CodeSourceIsEmptyError(GridAssignmentError):
+
     """Exception raised for any input other than list of strings
     while reading source in 's' mode"""
 
