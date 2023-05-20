@@ -1,12 +1,20 @@
-class CodeFileNotFoundError(Exception):
-    """Exception raised for code file is not found"""
-
-    def __init__(self):
-        self.message = "The befunge code file is not found"
+class GridAssignmentError(Exception):
+    """Parent exception for all grid assignments errors"""
+    def __init__(self, message):
+        self.message = "Grid assignment isn't correct.\n" + message
         super().__init__(self.message)
 
 
-class CodeFileIsOutOfBoundsError(Exception):
+class WrongSetGridModeError(GridAssignmentError):
+    """Exception raised for using wrong setting grid mode"""
+
+    def __init__(self):
+        self.message = "The grid setting mode is wrong, should be" \
+                       "'f' for files or 's' for string list"
+        super().__init__(self.message)
+
+
+class CodeFileIsOutOfBoundsError(GridAssignmentError):
     """Exception raised for code file width or height is out of 25×80 bounds"""
 
     def __init__(self):
@@ -15,7 +23,7 @@ class CodeFileIsOutOfBoundsError(Exception):
         super().__init__(self.message)
 
 
-class CodeFileIsNotRectangleError(Exception):
+class CodeFileIsNotRectangleError(GridAssignmentError):
     """Exception raised for non-rectangle code files"""
 
     def __init__(self):
@@ -23,24 +31,31 @@ class CodeFileIsNotRectangleError(Exception):
         super().__init__(self.message)
 
 
-class GridIsNotDefinedError(Exception):
-    """Exception raised for executing any command without assigning grid"""
+class GridFileAssignmentError(GridAssignmentError):
+    """Parent exception for assignment grid from a file"""
 
-    def __init__(self):
-        self.message = "The grid is not defined"
+    def __init__(self, message):
+        self.message = "Assignment from file mode.\n" + message
         super().__init__(self.message)
 
 
-class CodeSourceIsNotStringListError(Exception):
-    """Exception raised for any input other than list of strings
-    while reading source in 's' mode"""
-
+class CodeFileNotFoundError(GridFileAssignmentError):
+    """Exception raised for code file is not found"""
     def __init__(self):
-        self.message = "Code source is not list of string for mode 's'"
+        self.message = "The befunge code file is not found"
         super().__init__(self.message)
 
 
-class CodeSourceIsEmptyError(Exception):
+class GridStringAssignmentError(GridAssignmentError):
+    """Parent exception for assignment grid from a list of strings"""
+
+    def __init__(self, message):
+        self.message = "Assignment from string mode.\n" + message
+        super().__init__(self.message)
+
+
+class CodeSourceIsEmptyError(GridAssignmentError):
+
     """Exception raised for any input other than list of strings
     while reading source in 's' mode"""
 
@@ -49,12 +64,20 @@ class CodeSourceIsEmptyError(Exception):
         super().__init__(self.message)
 
 
-class WrongSetGridModeError(Exception):
-    """Exception raised for using wrong setting grid mode"""
+class CodeSourceIsNotStringListError(GridStringAssignmentError):
+    """Exception raised for any input other than list of strings
+    while reading source in 's' mode"""
 
     def __init__(self):
-        self.message = "The grid setting mode is wrong, should be" \
-                       "'f' for files or 's' for string list"
+        self.message = "Code source is not list of string for mode 's'"
+        super().__init__(self.message)
+
+
+class GridIsNotDefinedError(Exception):
+    """Exception raised for executing any command without assigning grid"""
+
+    def __init__(self):
+        self.message = "The grid is not defined"
         super().__init__(self.message)
 
 
