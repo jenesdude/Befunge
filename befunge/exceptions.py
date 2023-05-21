@@ -1,5 +1,6 @@
 class GridAssignmentError(Exception):
     """Parent exception for all grid assignments errors"""
+
     def __init__(self, message):
         self.message = "Grid assignment isn't correct.\n" + message
         super().__init__(self.message)
