@@ -41,6 +41,7 @@ class GridFileAssignmentError(GridAssignmentError):
 
 class CodeFileNotFoundError(GridFileAssignmentError):
     """Exception raised for code file is not found"""
+
     def __init__(self):
         self.message = "The befunge code file is not found"
         super().__init__(self.message)
@@ -55,7 +56,6 @@ class GridStringAssignmentError(GridAssignmentError):
 
 
 class CodeSourceIsEmptyError(GridAssignmentError):
-
     """Exception raised for any input other than list of strings
     while reading source in 's' mode"""
 
