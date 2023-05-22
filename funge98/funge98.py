@@ -35,11 +35,11 @@ class FungeStack:
         else:
             self.stack[0].append(0)  # if there is one stack, push 0
 
-    def begin_block(self, ip):
+    def begin_block(self, space, ip):
         """Creates new stack of the top of FungeStack, then transfers n
         elements from SOSS to TOSS, then pushes ip (vector) into SOSS."""
         if len(ip) != self.dimension:
-            raise IPHasInWrongDimensionError
+            raise IPHasInWrongDimensionError(space)
         n = self.pop()
         self.stack.insert(0, [])
         if n > 0:
