@@ -56,7 +56,7 @@ class GridStringAssignmentError(GridAssignmentError):
         super().__init__(self.message)
 
 
-class CodeSourceIsEmptyError(GridAssignmentError):
+class CodeSourceIsEmptyError(GridStringAssignmentError):
     """Exception raised for any input other than list of strings
     while reading source in 's' mode"""
 
