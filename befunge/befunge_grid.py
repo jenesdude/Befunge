@@ -141,7 +141,8 @@ class BefungeGrid:
             self.grid[0] = "0" + self.grid[0][1:]
 
     def _get(self):
-        """Inner method for getting value from top two coordinates from stack"""
+        """Inner method for stack 'get' command.
+        Get value by top two coordinates from stack"""
         try:
             get_y = self.stack.pop()
             get_x = self.stack.pop()
