@@ -11,16 +11,16 @@ def test_raise_code_file_not_found_error():
 def test_raise_code_file_is_out_of_bounds_error():
     with pytest.raises(exceptions.CodeFileIsOutOfBoundsError):
         grid = befunge_grid.BefungeGrid()
-        grid.set_grid("f", "Tests/Code_files/exception_width.txt")
+        grid.set_grid("f", "Code_files/exception_width.txt")
     with pytest.raises(exceptions.CodeFileIsOutOfBoundsError):
         grid = befunge_grid.BefungeGrid()
-        grid.set_grid("f", "Tests/Code_files/exception_height.txt")
+        grid.set_grid("f", "Code_files/exception_height.txt")
 
 
 def test_raise_code_is_not_rectangle_error():
     with pytest.raises(exceptions.CodeFileIsNotRectangleError):
         grid = befunge_grid.BefungeGrid()
-        grid.set_grid("f", r"Tests/Code_files/non_rectangle_file.txt")
+        grid.set_grid("f", r"Code_files/non_rectangle_file.txt")
 
 
 def test_grid_is_not_defined_error():
