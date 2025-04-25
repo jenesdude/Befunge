@@ -28,7 +28,8 @@ class TestBefungeGrid(unittest.TestCase):
         string_list = ['"qwerty"@']
         grid.set_grid("s", string_list)
         grid.run()
-        self.assertEqual("".join(chr(e) for e in grid.stack), string_list[0][1:-2])
+        self.assertEqual("".join(chr(e) for e in grid.stack),
+                         string_list[0][1:-2])
 
     def test_numbers_into_stack(self):
         grid = befunge_grid.BefungeGrid()
@@ -112,7 +113,7 @@ class TestBefungeGrid(unittest.TestCase):
         string_list = ["&@"]
         grid.set_grid("s", string_list)
         grid.run()
-        self.assertEqual(grid.stack[0],1)
+        self.assertEqual(grid.stack[0], 1)
 
     @patch('sys.stdin', StringIO("\t"))
     def test_input_tilda_command(self):

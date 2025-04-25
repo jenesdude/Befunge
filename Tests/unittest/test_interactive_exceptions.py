@@ -20,7 +20,9 @@ class TestIAExceptions(unittest.TestCase):
             grid.run()
 
     def test_complete_grid_alteration_run_error(self):
-        with self.assertRaises(interactive_exceptions.CompleteIAGridAlterationError):
+        with self.assertRaises(
+                interactive_exceptions.CompleteIAGridAlterationError
+        ):
             grid = interactive_befunge_grid.IABefungeGrid()
             with patch('sys.stdin', new=StringIO(">>v@\n<<<^\n\n")):
                 grid.run()
@@ -28,7 +30,9 @@ class TestIAExceptions(unittest.TestCase):
                 grid.run()
 
     def test_complete_grid_alteration_make_error(self):
-        with self.assertRaises(interactive_exceptions.CompleteIAGridAlterationError):
+        with self.assertRaises(
+                interactive_exceptions.CompleteIAGridAlterationError
+        ):
             grid = interactive_befunge_grid.IABefungeGrid()
             with patch('sys.stdin', new=StringIO(">>v@\n<<<^\n\n")):
                 grid.run()
