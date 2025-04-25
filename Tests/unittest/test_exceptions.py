@@ -12,17 +12,17 @@ class TestExceptions(unittest.TestCase):
     def test_raise_code_file_is_out_of_bounds_error(self):
         with self.assertRaises(exceptions.CodeFileIsOutOfBoundsError):
             grid = befunge_grid.BefungeGrid()
-            source = Path("Code_files") / "exception_width.txt"
+            source = Path("exception_width.txt")
             grid.set_grid("f", source)
         with self.assertRaises(exceptions.CodeFileIsOutOfBoundsError):
             grid = befunge_grid.BefungeGrid()
-            source = Path("Code_files") / "exception_height.txt"
+            source = Path("exception_height.txt")
             grid.set_grid("f", source)
 
     def test_raise_code_is_not_rectangle_error(self):
         with self.assertRaises(exceptions.CodeFileIsNotRectangleError):
             grid = befunge_grid.BefungeGrid()
-            source = Path("Code_files") / "non_rectangle_file.txt"
+            source = Path("non_rectangle_file.txt")
             grid.set_grid("f", source)
 
     def test_grid_is_not_defined_error(self):
