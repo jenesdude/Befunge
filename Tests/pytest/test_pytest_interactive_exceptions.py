@@ -18,11 +18,19 @@ def test_grid_is_not_rectangle_error(monkeypatch):
         grid.run()
 
 
-def test_complete_grid_alteration_error(monkeypatch):
+def test_complete_grid_alteration_run_error(monkeypatch):
     with pytest.raises(interactive_exceptions.CompleteIAGridAlterationError):
         grid = interactive_befunge_grid.IABefungeGrid()
         monkeypatch.setattr('sys.stdin', StringIO(">>v@\n<<<^\n\n"))
         grid.run()
         monkeypatch.setattr('sys.stdin', StringIO("123@\n"))
-        # grid.make_grid()
         grid.run()
+
+
+def test_complete_grid_alteration_make_error(monkeypatch):
+    with pytest.raises(interactive_exceptions.CompleteIAGridAlterationError):
+        grid = interactive_befunge_grid.IABefungeGrid()
+        monkeypatch.setattr('sys.stdin', StringIO(">>v@\n<<<^\n\n"))
+        grid.run()
+        monkeypatch.setattr('sys.stdin', StringIO("123@\n"))
+        grid.make_grid()
