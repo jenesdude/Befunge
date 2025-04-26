@@ -32,7 +32,7 @@ class BefungeGrid:
             except FileNotFoundError:
                 raise CodeFileNotFoundError from None
         elif mode == "s":
-            if source is not list:
+            if not isinstance(source, list):
                 raise CodeSourceIsNotStringListError from None
             rows = source
             height = len(rows)
