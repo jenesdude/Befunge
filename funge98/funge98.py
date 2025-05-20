@@ -81,7 +81,7 @@ class FungeStack:
 class FungeSpace:
     """Class for Funge Space"""
     def __init__(self):
-        self.stack = FungeStack(2)
+        self.stack = FungeStack(dimension=2)
         self.code_height = 0
         self.code_width = 0
         self.y = 0
@@ -109,13 +109,12 @@ class UnefungeSpace:
         self.stack = FungeStack(2)
         self.code_height = 0
         self.code_width = 0
-        self.y = 0
         self.x = 0
         self.space = [" " * 256]
         self.move_direction = ">"
         self.string_mode = False
 
 
-class TrifungeSpace:
+class TrefungeSpace:
     """Class for Trifunge Space"""
     pass
