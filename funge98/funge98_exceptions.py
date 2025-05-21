@@ -57,12 +57,20 @@ class CodeSourceIsEmptyError(SpaceStringAssignmentError):
         super().__init__(self.message)
 
 
-class CodeSourceIsNotStringListError(SpaceStringAssignmentError):
-    """Exception raised for any input other than list of strings
-    while reading source in 's' mode"""
+class CodeSourceInappropriateFormatError(SpaceStringAssignmentError):
+    """Exception raised for any input other than string or list of strings
+    depending on dimensions while reading source in 's' mode"""
 
     def __init__(self):
         self.message = "Code source is not list of string for mode 's'"
+        super().__init__(self.message)
+
+
+class DimensionNotImplementedError(SpaceStringAssignmentError):
+    """Exception raised for any dimension other than 1, 2, or 3."""
+
+    def __init__(self, dimension):
+        self.message = f"Impl. for {dimension} dimensions doesn't exist"
         super().__init__(self.message)
 
 
