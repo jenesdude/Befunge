@@ -5,47 +5,105 @@ from funge98.funge98_exceptions import *
 class FungeStack:
     """Class for stack of stacks.
     Every cell contains an int value from 0 to 255."""
-    stack: List[List[int]]
+    stack_stack: List[List[int]]
+    stack: List[int]
 
     def __init__(self, dimension=2):
-        self.stack = [[]]
+        self.stack_stack = [[]]
+        self.stack = self.stack_stack[0]
         self.dimension = dimension
 
     def pop(self, n=0):
         """Popping a value. If negative n is popping, n elements are removed
         from the top of stack stack."""
         if n < 0:
-            self.stack[0] = self.stack[0][:-min(len(self.stack[0]), n)]
+            self.stack = self.stack[:-min(len(self.stack), n)]
         else:
-            if self.stack[0]:
-                return self.stack[0].pop()
+            if self.stack:
+                return self.stack.pop()
             else:
                 return 0
 
+    def store(self, value):
+        self.stack.append(int(value, 16))
+
+    def arithmetic(self, command):
+        if command == "+":
+            a = self.pop()
+            b = self.pop()
+            self.stack.append(a + b)
+        elif command == "-":
+            a = self.pop()
+            b = self.pop()
+            self.stack.append(a - b)
+        elif command == "*":
+            a = self.pop()
+            b = self.pop()
+            self.stack.append(a * b)
+        elif command == "/":
+            try:
+                a = self.pop()
+                b = self.pop()
+                self.stack.append(a // b)
+            except ZeroDivisionError:
+                self.stack.append(0)
+        elif command == "%":
+            try:
+                a = self.pop()
+                b = self.pop()
+                self.stack.append(a % b)
+            except ZeroDivisionError:
+                self.stack.append(0)
+        elif command == "!":
+            a = self.pop()
+            if a == 0:
+                self.stack.append(1)
+            else:
+                self.stack.append(0)
+        elif command == "`":
+            a = self.pop()
+            b = self.pop()
+            self.stack.append(1 if b > a else 0)
+        else:
+            raise IncorrectCommandError(command) from None
+
+    def stack_manipulation(self):
+
+
+    def stack_stack_manipulation(self, command):
+        if command == "{":
+            self.begin_block()
+        elif command == "}":
+            self.end_block()
+        elif command == "u":
+            self.stack_under_stack()
+        else:
+            raise IncorrectCommandError(command) from None
+
     def push(self, value):
-        self.stack[0].append(value)
+        self.stack.append(value)
 
     def clear(self):
-        self.stack[0] = []
+        self.stack = []
 
     def swap(self):
-        if len(self.stack[0]) > 1:
-            self.stack[0][-1], self.stack[0][-2] = \
-                self.stack[0][-2], self.stack[0][-1]
+        if len(self.stack) > 1:
+            self.stack[-1], self.stack[-2] = \
+                self.stack[-2], self.stack[-1]
         else:
-            self.stack[0].append(0)  # if there is one stack, push 0
+            self.stack.append(0)  # if there is one stack, push 0
 
-    def begin_block(self, space, ip):
+    def begin_block(self):
         """Creates new stack of the top of FungeStack, then transfers n
         elements from SOSS to TOSS, then pushes ip (vector) into SOSS."""
-        if len(ip) != self.dimension:
-            raise IPHasInWrongDimensionError(space)
+        # TODO переписать, используя self.stack вместо self.stac[0] и self.stack_stack вместо self.stack
+        ip = [self.pop() for i in range(self.dimension)]
         n = self.pop()
         self.stack.insert(0, [])
         if n > 0:
             if len(self.stack) > 1:
                 if n <= len(self.stack[1]):
-                    self.stack[0] = self.stack[1][-n:]
+                    self.stack = self.stack[1][-n:]
                     self.stack[1] = self.stack[1][:-n] + ip
                 else:
                     self.stack[0] = self.stack[1] +\
@@ -59,6 +117,7 @@ class FungeStack:
     def end_block(self):
         """Transfers n elements from TOSS to SOSS and pops entire TOSS,
         returns current ip as ip popped from SOSS"""
+        # TODO переписать, используя self.stack вместо self.stac[0] и self.stack_stack вместо self.stack
         n = self.pop()
         if n > 0:
             if len(self.stack) > 1:
@@ -76,6 +135,17 @@ class FungeStack:
             pass
         else:
             pass
+
+    def stack_under_stack(self):
+        # TODO написать
+        pass
+
+    operations = {
+        r"0123456789abcdef": store,
+        r"$:\n": stack_manipulation,
+        r"{}u": stack_stack_manipulation,
+        r"+-*/%!`:\$": arithmetic,
+    }
 
 
 class FungeSpace:

@@ -77,26 +77,13 @@ class SpaceIsNotDefinedError(Exception):
 class FungeError(Exception):
     """Base Exception for any Funge-98 errors"""
 
-    def __init__(self, message, space):
-        command = space.space[space.y][space.x]
-        super().__init__(f"{message} [ {command} ] at Y: {str(space.y)},"
-                         f"X:{str(space.x)}")
+    def __init__(self, message):
+        super().__init__(f"{message}")
 
 
-class NotEnoughElementsInStackError(FungeError):
-    """Exception raised for executing commands
-    that require more arguments than there are in stack"""
+class IncorrectCommandError(FungeError):
+    """Exception raised when wrong command is passed into internal function"""
 
-    def __init__(self, space):
-        self.message = "The stack doesn't have enough elements for command"
-        super().__init__(self.message, space)
-
-
-class IPHasInWrongDimensionError(FungeError):
-    """Exception raised when in 'begin block' command '{' ip vector is not
-    equal to space dimension"""
-
-    def __init__(self, space):
-        self.message = "The ip vector length to 'begin block' command" \
-                       "is not equal to the space dimension"
-        super().__init__(self.message, space)
+    def __init__(self, command):
+        self.message = f"The command [{command}] had not been implemented"
+        super().__init__(self.message)
