@@ -150,27 +150,49 @@ class FungeStack:
 
 class FungeSpace:
     """Class for Funge Space"""
-    def __init__(self):
-        self.stack = FungeStack(dimension=2)
-        self.code_height = 0
-        self.code_width = 0
-        self.y = 0
-        self.x = 0
-        self.space = [" " * 256] * 256
-        self.move_direction = ">"
+    def __init__(self, dimension):
+        self.stack = FungeStack(dimension)
+        self.dimension = dimension  # 1, 2, 3 for a specific Funge
+        self.code_dimensions = []  # known dimensions for Lahey-Space impl.
+        self.coords = [0] * self.dimension  # origin
+        self.motion_vector = [1] + [0] * (self.dimension - 1)
+        self.storage_offset = [0] * self.dimension
+        self.space = None
         self.string_mode = False
+        self.comment_mode = False
 
     @staticmethod
-    def _read_source(mode="f", source=None):
-        """Inner method for reading source. Either file or list of strings"""
+    def _read_source(mode="f", dimension=2, source=None):
+        """Inner method for reading source. Either file in "f" mode
+        or string, list of strings or list of lists of strings in "s" mode.
+        Returns space and list of dimensions length according to dimenions"""
         if mode == "f":
             try:
                 with open(source, "r", encoding="utf-8") as file:
-                    rows = file.read().split("\n")
-                    height = len(rows)
-                    width = len(rows[0])
+                    if dimension == 1:
+                        space = file.read().replace("\n", "")
+                        return space, [len(space)]
+                    elif dimension == 2:
+                        space = file.read().split("\n")
+                        max_x = max(map(lambda a: len(a), space))
+                        return space, [max_x, len(space)]
+                    elif dimension == 3:
+                        pass
+                        # TODO
+                    else:
+                        raise DimensionNotImplementedError(dimension) from None
             except FileNotFoundError:
                 raise CodeFileNotFoundError from None
+        elif mode == "s":
+            if dimension == 1:
+                if not isinstance(source, str):
+                    raise CodeSourceInappropriateFormatError from None
+                space = None
+                # TODO
+                pass
+            elif dimension == 2:
+                if not isinstance(source, list):
+                    pass
 
 
 class UnefungeSpace:
