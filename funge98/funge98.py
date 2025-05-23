@@ -25,50 +25,64 @@ class FungeStack:
                 return 0
 
     def store(self, value):
-        self.stack.append(int(value, 16))
+        self.push(int(value, 16))
 
     def arithmetic(self, command):
         if command == "+":
             a = self.pop()
             b = self.pop()
-            self.stack.append(a + b)
+            self.push(a + b)
         elif command == "-":
             a = self.pop()
             b = self.pop()
-            self.stack.append(a - b)
+            self.push(a - b)
         elif command == "*":
             a = self.pop()
             b = self.pop()
-            self.stack.append(a * b)
+            self.push(a * b)
         elif command == "/":
             try:
                 a = self.pop()
                 b = self.pop()
-                self.stack.append(a // b)
+                self.push(a // b)
             except ZeroDivisionError:
-                self.stack.append(0)
+                self.push(0)
         elif command == "%":
             try:
                 a = self.pop()
                 b = self.pop()
-                self.stack.append(a % b)
+                self.push(a % b)
             except ZeroDivisionError:
-                self.stack.append(0)
+                self.push(0)
         elif command == "!":
             a = self.pop()
             if a == 0:
-                self.stack.append(1)
+                self.push(1)
             else:
-                self.stack.append(0)
+                self.push(0)
         elif command == "`":
             a = self.pop()
             b = self.pop()
-            self.stack.append(1 if b > a else 0)
+            self.push(1 if b > a else 0)
         else:
             raise IncorrectCommandError(command) from None
 
-    def stack_manipulation(self):
-
+    def stack_manipulation(self, command):
+        if command == "$":
+            self.pop()
+        elif command == ":":
+            a = self.pop()
+            self.push(a)
+            self.push(a)
+        elif command == "\\":
+            a = self.pop()
+            b = self.pop()
+            self.push(a)
+            self.push(b)
+        elif command == "n":
+            self.stack = []
+        else:
+            raise IncorrectCommandError(command) from None
 
     def stack_stack_manipulation(self, command):
         if command == "{":
@@ -83,23 +97,15 @@ class FungeStack:
     def push(self, value):
         self.stack.append(value)
 
-    def clear(self):
-        self.stack = []
-
-    def swap(self):
-        if len(self.stack) > 1:
-            self.stack[-1], self.stack[-2] = \
-                self.stack[-2], self.stack[-1]
-        else:
-            self.stack.append(0)  # if there is one stack, push 0
-
     def begin_block(self):
-        """Creates new stack of the top of FungeStack, then transfers n
-        elements from SOSS to TOSS, then pushes ip (vector) into SOSS."""
+        """Pop n-value from the TOSS. Create new TOSS.
+        Transfer n elements from SOSS to TOSS, order is preserved.
+        Push storage offset into SOSS, dimension-dependent.
+        Change storage offset to the location to be executed next by IP."""
         # TODO переписать, используя self.stack вместо self.stac[0] и self.stack_stack вместо self.stack
-        ip = [self.pop() for i in range(self.dimension)]
         n = self.pop()
-        self.stack.insert(0, [])
+        # ip = [self.pop() for i in range(self.dimension)]
+        self.stack_stack.insert(0, [])
         if n > 0:
             if len(self.stack) > 1:
                 if n <= len(self.stack[1]):
@@ -110,13 +116,16 @@ class FungeStack:
                                     [0] * (n - len(self.stack[1]))
                     self.stack[1] = ip
         elif n < 0:
-            self.stack[1] += [0] * n
+            self.stack_stack[1] += [0] * n
         else:
-            self.stack[1] += ip
+            self.stack_stack[1] +=
 
     def end_block(self):
-        """Transfers n elements from TOSS to SOSS and pops entire TOSS,
-        returns current ip as ip popped from SOSS"""
+        """Pop n-value from the TOSS.
+        Pop storage offset from SOSS, dimension-dependent.
+        Change storage offset to popped vector.
+        Transfer n elements from TOSS to SOSS, order is preserved.
+        Pop entire TOSS."""
         # TODO переписать, используя self.stack вместо self.stac[0] и self.stack_stack вместо self.stack
         n = self.pop()
         if n > 0:
@@ -141,10 +150,10 @@ class FungeStack:
         pass
 
     operations = {
-        r"0123456789abcdef": store,
-        r"$:\n": stack_manipulation,
-        r"{}u": stack_stack_manipulation,
-        r"+-*/%!`:\$": arithmetic,
+        "0123456789abcdef": store,
+        "$:n\\": stack_manipulation,
+        "{}u": stack_stack_manipulation,
+        "+-*/%!`": arithmetic,
     }
 
 
