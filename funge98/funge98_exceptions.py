@@ -82,7 +82,7 @@ class SpaceIsNotDefinedError(Exception):
         super().__init__(self.message)
 
 
-class FungeError(Exception):
+class FungeError(Exception, space):
     """Base Exception for any Funge-98 errors"""
 
     def __init__(self, message, space):
@@ -91,6 +91,11 @@ class FungeError(Exception):
                          f"X:{str(space.x)}")
 
 
+class NoSOSSError(FungeError):
+    """Exception raised when """
+
+    def __init__(self, message, space):
+        command = space.space
 
 class IncorrectCommandError(FungeError):
     """Exception raised when wrong command is passed into internal function"""

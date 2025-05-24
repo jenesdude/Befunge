@@ -1,5 +1,5 @@
 from typing import List
-from funge98.funge98_exceptions import *
+from funge98_exceptions import *
 
 
 class FungeStack:
@@ -13,16 +13,32 @@ class FungeStack:
         self.stack = self.stack_stack[0]
         self.dimension = dimension
 
-    def pop(self, n=0):
-        """Popping a value. If negative n is popping, n elements are removed
-        from the top of stack stack."""
-        if n < 0:
-            self.stack = self.stack[:-min(len(self.stack), n)]
+    def pop(self):
+        """Pop a value from TOSS (top of stack stack).
+        If there is no value to return, then return 0."""
+        if self.stack:
+            return self.stack.pop()
+        return 0
+
+    def pop_n(self, n, reversed=False):
+        """Pop n values from stack"""
+        values = [self.stack.pop() for _ in range(n)]
+        if reversed:
+            return values[::-1]
         else:
-            if self.stack:
-                return self.stack.pop()
-            else:
-                return 0
+            return values
+
+    def pop_soss(self):
+        """Pop a value from SOSS (second on stack stack).
+        If there is no SOSS, pop 0."""
+        if len(self.stack_stack) > 1:
+            if self.stack_stack[1]:
+                return self.stack_stack[1].pop()
+        raise NoSOSSError from None
+
+    def push(self, *values):
+        for value in values:
+            self.stack.append(value)
 
     def store(self, value):
         self.push(int(value, 16))
@@ -84,75 +100,17 @@ class FungeStack:
         else:
             raise IncorrectCommandError(command) from None
 
-    def stack_stack_manipulation(self, command):
-        if command == "{":
-            self.begin_block()
-        elif command == "}":
-            self.end_block()
-        elif command == "u":
-            self.stack_under_stack()
-        else:
-            raise IncorrectCommandError(command) from None
-
-    def push(self, value):
-        self.stack.append(value)
-
-    def begin_block(self):
-        """Pop n-value from the TOSS. Create new TOSS.
-        Transfer n elements from SOSS to TOSS, order is preserved.
-        Push storage offset into SOSS, dimension-dependent.
-        Change storage offset to the location to be executed next by IP."""
-        # TODO переписать, используя self.stack вместо self.stac[0] и self.stack_stack вместо self.stack
-        n = self.pop()
-        # ip = [self.pop() for i in range(self.dimension)]
-        self.stack_stack.insert(0, [])
-        if n > 0:
-            if len(self.stack) > 1:
-                if n <= len(self.stack[1]):
-                    self.stack = self.stack[1][-n:]
-                    self.stack[1] = self.stack[1][:-n] + ip
-                else:
-                    self.stack[0] = self.stack[1] +\
-                                    [0] * (n - len(self.stack[1]))
-                    self.stack[1] = ip
-        elif n < 0:
-            self.stack_stack[1] += [0] * n
-        else:
-            self.stack_stack[1] +=
-
-    def end_block(self):
-        """Pop n-value from the TOSS.
-        Pop storage offset from SOSS, dimension-dependent.
-        Change storage offset to popped vector.
-        Transfer n elements from TOSS to SOSS, order is preserved.
-        Pop entire TOSS."""
-        # TODO переписать, используя self.stack вместо self.stac[0] и self.stack_stack вместо self.stack
-        n = self.pop()
-        if n > 0:
-            if len(self.stack) > 1:
-                ip = self.stack[1][:-self.dimension]
-                self.stack[1] = self.stack[1][-self.dimension:]
-                if n <= len(self.stack[0]):
-                    self.stack[1] = self.stack[0][-n:]
-                    self.stack = self.stack[1:]
-                else:
-                    self.stack[0] = self.stack[0] +\
-                                    [0] * (n - len(self.stack[0]))
-            else:
-                return -1  # special code for reversing the flow
-        elif n < 0:
-            pass
-        else:
-            pass
-
     def stack_under_stack(self):
-        # TODO написать
-        pass
+        count = self.pop()
+        if len(self.stack_stack) < 2:
+            raise NoSOSSError from None
+        soss_elements = [self.pop_soss() for _ in range(count)]
+        self.push(*soss_elements)
 
     operations = {
         "0123456789abcdef": store,
         "$:n\\": stack_manipulation,
-        "{}u": stack_stack_manipulation,
+        "u": stack_under_stack,
         "+-*/%!`": arithmetic,
     }
 
@@ -163,8 +121,8 @@ class FungeSpace:
         self.stack = FungeStack(dimension)
         self.dimension = dimension  # 1, 2, 3 for a specific Funge
         self.code_dimensions = []  # known dimensions for Lahey-Space impl.
-        self.coords = [0] * self.dimension  # origin
-        self.motion_vector = [1] + [0] * (self.dimension - 1)
+        self.ip_pos = [0] * self.dimension  # origin
+        self.delta = [1] + [0] * (self.dimension - 1)
         self.storage_offset = [0] * self.dimension
         self.space = None
         self.string_mode = False
@@ -203,19 +161,77 @@ class FungeSpace:
                 if not isinstance(source, list):
                     pass
 
+    def stack_stack_manipulation(self, command):
+        if command == "{":
+            self.begin_block()
+        elif command == "}":
+            self.end_block()
+        elif command == "u":
+            self.stack.stack_under_stack()
+        else:
+            raise IncorrectCommandError(command) from None
+
+    def begin_block(self):
+        """Pop n-value from the TOSS. Create new TOSS.
+        Transfer n elements from SOSS to TOSS, order is preserved.
+        Push storage offset into SOSS, dimension-dependent.
+        Change storage offset to the location to be executed next by IP."""
+        n = self.stack.pop()
+        if n > 0:
+            toss = self.stack.pop_n(n, reversed=True)
+        elif n < 0:
+            toss = [0] * n
+        else:
+            toss = []
+        self.stack.push(*self.storage_offset)
+        self.storage_offset = list(
+            map(lambda a, b: a + b, self.ip_pos, self.delta)
+        )
+        self.stack.stack_stack.insert(0, toss)
+
+    def end_block(self):
+        """Pop n-value from the TOSS.
+        Pop storage offset from SOSS, dimension-dependent.
+        Change storage offset to popped vector.
+        Transfer n elements from TOSS to SOSS, order is preserved.
+        Pop entire TOSS."""
+        n = self.stack.pop()
+        storage_offset = self.stack.pop_n(n, reversed=True)
+        if n > 0:
+            if len(self.stack) > 1:
+                ip = self.stack[1][:-self.dimension]
+                self.stack[1] = self.stack[1][-self.dimension:]
+                if n <= len(self.stack[0]):
+                    self.stack[1] = self.stack[0][-n:]
+                    self.stack = self.stack[1:]
+                else:
+                    self.stack[0] = self.stack[0] +\
+                                    [0] * (n - len(self.stack[0]))
+            else:
+                return -1  # special code for reversing the flow
+        elif n < 0:
+            pass
+        else:
+            pass
+
 
 class UnefungeSpace:
-    """Class for Unefunge Space"""
+    """Class for Unefunge Space with Funge98 specification"""
     def __init__(self):
-        self.stack = FungeStack(2)
-        self.code_height = 0
-        self.code_width = 0
-        self.x = 0
+        super().__init__(1)
         self.space = [" " * 256]
-        self.move_direction = ">"
+        self.delta = [1]
         self.string_mode = False
 
 
+class BefungeSpace(FungeSpace):
+    """Class for Befunge Space with Funge98 specification"""
+    def __init__(self):
+        super().__init__(2)
+
+
 class TrefungeSpace:
-    """Class for Trifunge Space"""
-    pass
+    """Class for Trefunge Space with Funge98 specification"""
+    def __init__(self):
+        super().__init__(3)
+
