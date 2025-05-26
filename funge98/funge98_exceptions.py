@@ -91,8 +91,15 @@ class FungeError(Exception, space):
                          f"X:{str(space.x)}")
 
 
+class NoTOSSError(FungeError):
+    """Exception raised when there is no TOSS, when it should be presented"""
+
+    def __init__(self, message, space):
+        command = space.space
+
+
 class NoSOSSError(FungeError):
-    """Exception raised when """
+    """Exception raised when there is no SOSS, when it should be presented"""
 
     def __init__(self, message, space):
         command = space.space
