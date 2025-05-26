@@ -21,10 +21,10 @@ class FungeStack:
         else:
             raise NoTOSSError from None
 
-    def pop_n(self, n, reversed=False):
+    def pop_n(self, n, reverse=False):
         """Pop n values from stack"""
         values = [self.stack.pop() for _ in range(n)]
-        if reversed:
+        if reverse:
             return values[::-1]
         else:
             return values
@@ -195,7 +195,7 @@ class FungeSpace:
         Change storage offset to the location to be executed next by IP."""
         n = self.stack.pop()
         if n > 0:
-            new_toss = self.stack.pop_n(n, reversed=True)
+            new_toss = self.stack.pop_n(n, reverse=True)
         elif n < 0:
             new_toss = [0] * n
         else:
@@ -215,8 +215,8 @@ class FungeSpace:
         If n = 0, transfer 0 elements.
         Then pop entire TOSS."""
         n = self.stack.pop()
-        self.storage_offset = self.stack.pop_n(self.dimension, reversed=True)
-        values = self.stack.pop_n(n, reversed=True)
+        self.storage_offset = self.stack.pop_n(self.dimension, reverse=True)
+        values = self.stack.pop_n(n, reverse=True)
         self.stack.pop_stack()
         if n > 0:
             self.stack.push(*values)
