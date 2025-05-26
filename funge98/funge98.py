@@ -172,6 +172,16 @@ class FungeSpace:
                 if not isinstance(source, list):
                     pass
 
+    def _move(self):
+        """Inner method for moving over space"""
+        # TODO
+        pass
+
+    def _change_direction(self, command):
+        """Inner method for changing move direction"""
+        # TODO
+        pass
+
     def reflect(self):
         self.delta = list(map(lambda a: a * -1, self.delta))
 
@@ -224,6 +234,27 @@ class FungeSpace:
             self.stack.pop_n(n)
         else:
             return
+
+    def evaluate(self, command, debug):
+        """Main method for evaluation code of Funge98."""
+        if debug:
+            # TODO
+            pass
+        if self.string_mode:
+            if command in '" ':
+                self.string_mode = False
+            else:
+                self.stack.push(command)
+        elif command in ">^<v|_?#|[]hjlmrvwx ":
+            self._change_direction(command)
+        elif command == "@q":
+            return False
+        else:
+            # TODO
+            print(f"Invalid operand [ {command} ] "
+                  f"at {self.ip_pos}")
+        self._move()
+        return True
 
 
 class UnefungeSpace:
