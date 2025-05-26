@@ -18,7 +18,8 @@ class FungeStack:
         If there is no value to return, then return 0."""
         if self.stack:
             return self.stack.pop()
-        return 0
+        else:
+            raise NoTOSSError from None
 
     def pop_n(self, n, reversed=False):
         """Pop n values from stack"""
@@ -27,6 +28,13 @@ class FungeStack:
             return values[::-1]
         else:
             return values
+
+    def pop_stack(self):
+        """Pop entire TOSS."""
+        if self.stack_stack:
+            self.stack_stack.pop()
+        else:
+            raise NoTOSSError from None
 
     def pop_soss(self):
         """Pop a value from SOSS (second on stack stack).
@@ -37,8 +45,11 @@ class FungeStack:
         raise NoSOSSError from None
 
     def push(self, *values):
-        for value in values:
-            self.stack.append(value)
+        if self.stack:
+            for value in values:
+                self.stack.append(value)
+        else:
+            raise NoTOSSError from None
 
     def store(self, value):
         self.push(int(value, 16))
@@ -161,20 +172,19 @@ class FungeSpace:
                 if not isinstance(source, list):
                     pass
 
-    def reverse_flow(self):
-        # TODO multiply self.delta by -1
-        pass
+    def reflect(self):
+        self.delta = list(map(lambda a: a * -1, self.delta))
 
     def stack_stack_manipulation(self, command):
-        if command == "{":
-            self.begin_block()
-        elif command == "}":
-            try:
+        try:
+            if command == "{":
+                self.begin_block()
+            elif command == "}":
                 self.end_block()
-            except NoSOSSError:
-                self.reverse_flow()
-        elif command == "u":
-            self.stack.stack_under_stack()
+            elif command == "u":
+                self.stack.stack_under_stack()
+        except NoTOSSError or NoSOSSError:
+            self.reflect()
         else:
             raise IncorrectCommandError(command) from None
 
@@ -200,26 +210,20 @@ class FungeSpace:
         """Pop n-value from the TOSS.
         Pop storage offset from SOSS, dimension-dependent.
         Change storage offset to popped vector.
-        Transfer n elements from TOSS to SOSS, order is preserved.
-        Pop entire TOSS."""
+        If n > 0, transfer n elements from TOSS to SOSS, order is preserved.
+        If n < 0, pop n elements from SOSS.
+        If n = 0, transfer 0 elements.
+        Then pop entire TOSS."""
         n = self.stack.pop()
-        storage_offset = self.stack.pop_n(n, reversed=True)
+        self.storage_offset = self.stack.pop_n(self.dimension, reversed=True)
+        values = self.stack.pop_n(n, reversed=True)
+        self.stack.pop_stack()
         if n > 0:
-            if len(self.stack) > 1:
-                ip = self.stack[1][:-self.dimension]
-                self.stack[1] = self.stack[1][-self.dimension:]
-                if n <= len(self.stack[0]):
-                    self.stack[1] = self.stack[0][-n:]
-                    self.stack = self.stack[1:]
-                else:
-                    self.stack[0] = self.stack[0] +\
-                                    [0] * (n - len(self.stack[0]))
-            else:
-                raise NoSOSSError from None
+            self.stack.push(*values)
         elif n < 0:
-            pass
+            self.stack.pop_n(n)
         else:
-            pass
+            return
 
 
 class UnefungeSpace:
@@ -241,4 +245,3 @@ class TrefungeSpace:
     """Class for Trefunge Space with Funge98 specification"""
     def __init__(self):
         super().__init__(3)
-
