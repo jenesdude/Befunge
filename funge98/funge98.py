@@ -161,11 +161,18 @@ class FungeSpace:
                 if not isinstance(source, list):
                     pass
 
+    def reverse_flow(self):
+        # TODO multiply self.delta by -1
+        pass
+
     def stack_stack_manipulation(self, command):
         if command == "{":
             self.begin_block()
         elif command == "}":
-            self.end_block()
+            try:
+                self.end_block()
+            except NoSOSSError:
+                self.reverse_flow()
         elif command == "u":
             self.stack.stack_under_stack()
         else:
@@ -178,16 +185,16 @@ class FungeSpace:
         Change storage offset to the location to be executed next by IP."""
         n = self.stack.pop()
         if n > 0:
-            toss = self.stack.pop_n(n, reversed=True)
+            new_toss = self.stack.pop_n(n, reversed=True)
         elif n < 0:
-            toss = [0] * n
+            new_toss = [0] * n
         else:
-            toss = []
+            new_toss = []
         self.stack.push(*self.storage_offset)
         self.storage_offset = list(
             map(lambda a, b: a + b, self.ip_pos, self.delta)
         )
-        self.stack.stack_stack.insert(0, toss)
+        self.stack.stack_stack.append(new_toss)
 
     def end_block(self):
         """Pop n-value from the TOSS.
@@ -208,7 +215,7 @@ class FungeSpace:
                     self.stack[0] = self.stack[0] +\
                                     [0] * (n - len(self.stack[0]))
             else:
-                return -1  # special code for reversing the flow
+                raise NoSOSSError from None
         elif n < 0:
             pass
         else:
