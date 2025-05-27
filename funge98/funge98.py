@@ -93,7 +93,7 @@ class FungeStack:
             b = self.pop()
             self.push(1 if b > a else 0)
         else:
-            raise IncorrectCommandError(command) from None
+            raise IncorrectCommandError(command, self) from None
 
     def stack_manipulation(self, command):
         if command == "$":
@@ -190,6 +190,8 @@ class FungeSpace(ABC):
             elif dimension == 2:
                 if not isinstance(source, list):
                     pass
+        else:
+            raise SetSpaceWrongModeError from None
 
     def _move(self):
         """Inner method for moving over space"""
@@ -269,9 +271,7 @@ class FungeSpace(ABC):
         elif command == "@q":
             return False
         else:
-            # TODO
-            print(f"Invalid operand [ {command} ] "
-                  f"at {self.ip_pos}")
+            raise NotImplementedCommandError(command, self)
         self._move()
         return True
 
