@@ -9,8 +9,8 @@ class SpaceAssignmentError(Exception):
 class SetSpaceWrongModeError(SpaceAssignmentError):
     """Exception raised for using wrong setting space mode"""
 
-    def __init__(self):
-        self.message = "The space setting mode is wrong, should be" \
+    def __init__(self, mode):
+        self.message = f"The space setting mode {mode} is wrong, should be" \
                        "'f' for files or 's' for string list"
         super().__init__(self.message)
 
