@@ -110,7 +110,7 @@ class FungeStack:
         elif command == "n":
             self.stack = []
         else:
-            raise IncorrectCommandError(command) from None
+            raise IncorrectCommandError(command, self) from None
 
     def stack_under_stack(self):
         count = self.pop()
@@ -159,49 +159,23 @@ class FungeSpace(ABC):
         self.__getitem__(key)
 
     @staticmethod
-    def _read_source(mode="f", dimension=2, source=None):
+    @abstractmethod
+    def _read_source(mode="f", source=None):
         """Inner method for reading source. Either file in "f" mode
         or string, list of strings or list of lists of strings in "s" mode.
         Returns space and list of dimensions length according to dimenions"""
-        if mode == "f":
-            try:
-                with open(source, "r", encoding="utf-8") as file:
-                    if dimension == 1:
-                        space = file.read().replace("\n", "")
-                        return space, [len(space)]
-                    elif dimension == 2:
-                        space = file.read().split("\n")
-                        max_x = max(map(lambda a: len(a), space))
-                        return space, [max_x, len(space)]
-                    elif dimension == 3:
-                        pass
-                        # TODO
-                    else:
-                        raise DimensionNotImplementedError(dimension) from None
-            except FileNotFoundError:
-                raise CodeFileNotFoundError from None
-        elif mode == "s":
-            if dimension == 1:
-                if not isinstance(source, str):
-                    raise CodeSourceInappropriateFormatError from None
-                space = None
-                # TODO
-                pass
-            elif dimension == 2:
-                if not isinstance(source, list):
-                    pass
-        else:
-            raise SetSpaceWrongModeError from None
 
+    @abstractmethod
+    def set_space(self, mode="f", source=None):
+        """Method for setting the space."""
+
+    @abstractmethod
     def _move(self):
         """Inner method for moving over space"""
-        # TODO
-        pass
 
+    @abstractmethod
     def _change_direction(self, command):
         """Inner method for changing move direction"""
-        # TODO
-        pass
 
     def reflect(self):
         self.delta = list(map(lambda a: a * -1, self.delta))
@@ -217,7 +191,7 @@ class FungeSpace(ABC):
         except NoTOSSError or NoSOSSError:
             self.reflect()
         else:
-            raise IncorrectCommandError(command) from None
+            raise IncorrectCommandError(command, self) from None
 
     def begin_block(self):
         """Pop n-value from the TOSS. Create new TOSS.
@@ -309,32 +283,120 @@ class UnefungeSpace(FungeSpace):
     """Class for Unefunge Space with Funge-98 specification"""
     def __init__(self):
         super().__init__(1)
-        self.space = [" " * 256]
-        self.delta = [1]
-        self.string_mode = False
+        self.space = " " * 256
 
     def __getitem__(self, key: int):
         self.getitem(key)
         return self.space[key]
+
+    @staticmethod
+    def _read_source(mode="f", source=None) -> (str, int):
+        """Inner method for reading source.
+        Source is either file in "f" mode or string in "s" mode.
+        Return space and its maximum dimensions"""
+        if mode == "f":
+            try:
+                with open(source, "r", encoding="utf-8") as file:
+                    space = file.read().replace("\n", "")
+                    return space, len(space)
+            except FileNotFoundError:
+                raise CodeFileNotFoundError from None
+        elif mode == "s":
+            if not isinstance(source, str):
+                raise CodeSourceInappropriateFormatError from None
+            return source, len(source)
+        else:
+            raise SetSpaceWrongModeError(mode) from None
+
+    def set_space(self, mode="f", source=None):
+        pass
+
+    def _move(self):
+        pass
+
+    def _change_direction(self, command):
+        pass
 
 
 class BefungeSpace(FungeSpace):
     """Class for Befunge Space with Funge-98 specification"""
     def __init__(self):
         super().__init__(2)
-        # TODO
+        self.space = [" " * 256] * 256
 
     def __getitem__(self, key: tuple[int] | list[int]):
         self.getitem(key)
         return self.space[key[0]][key[1]]
+
+    @staticmethod
+    def _read_source(mode="f", source=None):
+        dimensions = [0, 0]
+        if mode == "f":
+            try:
+                with open(source, "r", encoding="utf-8") as file:
+                    space = file.read().split("\n")
+                    dimensions[0] = max(len(row) for row in space)
+                    dimensions[1] = len(space)
+                    return space, dimensions
+            except FileNotFoundError:
+                raise CodeFileNotFoundError from None
+        elif mode == "s":
+            if not isinstance(source, list):
+                raise CodeSourceInappropriateFormatError from None
+            dimensions[0] = max(len(row) for row in source)
+            dimensions[1] = len(source)
+            return source, dimensions
+        else:
+            raise SetSpaceWrongModeError(mode) from None
+
+    def set_space(self, mode="f", source=None):
+        pass
+
+    def _move(self):
+        pass
+
+    def _change_direction(self, command):
+        pass
 
 
 class TrefungeSpace(FungeSpace):
     """Class for Trefunge Space with Funge-98 specification"""
     def __init__(self):
         super().__init__(3)
-        # TODO
+        self.space = [" " * 256] * 256
 
     def __getitem__(self, key: tuple[int] | list[int]):
         self.getitem(key)
         return self.space[key[0]][key[1]][key[0]]
+
+    @staticmethod
+    def _read_source(mode="f", source=None):
+        dimensions = [0, 0, 0]
+        if mode == "f":
+            try:
+                with open(source, "r", encoding="utf-8") as file:
+                    layers = file.read().split("\n\n")
+                    space = [layer.split("\n") for layer in layers]
+                    dimensions[0] = max(
+                        max(len(row) for row in layer)
+                        for layer in space)
+                    dimensions[1] = max(len(layer) for layer in space)
+                    dimensions[2] = len(space)
+                    return space, dimensions
+            except FileNotFoundError:
+                raise CodeFileNotFoundError from None
+        elif mode == "s":
+            if not isinstance(source, str):
+                raise CodeSourceInappropriateFormatError from None
+            return source, len(source)
+        else:
+            raise SetSpaceWrongModeError(mode) from None
+
+    def set_space(self, mode="f", source=None):
+        pass
+
+    def _move(self):
+        pass
+
+    def _change_direction(self, command):
+        pass
