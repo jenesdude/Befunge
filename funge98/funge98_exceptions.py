@@ -6,7 +6,7 @@ class SpaceAssignmentError(Exception):
         super().__init__(self.message)
 
 
-class WrongSetSpaceModeError(SpaceAssignmentError):
+class SetSpaceWrongModeError(SpaceAssignmentError):
     """Exception raised for using wrong setting space mode"""
 
     def __init__(self):
@@ -82,31 +82,60 @@ class SpaceIsNotDefinedError(Exception):
         super().__init__(self.message)
 
 
-class FungeError(Exception, space):
-    """Base Exception for any Funge-98 errors"""
+class FungeStackError(Exception):
+    """Parent exception for any FungeStack errors"""
 
-    def __init__(self, message, space):
-        command = space.space[space.y][space.x]
-        super().__init__(f"{message} [ {command} ] at Y: {str(space.y)},"
-                         f"X:{str(space.x)}")
+    def __init__(self, command, message, stack):
+        self.message = ("Funge-98 isn't correct.\n"
+                        "{} [ {} ] with stack: {}\n{}".format
+                         (message, command, stack, message))
+        super().__init__(self.message)
 
 
-class NoTOSSError(FungeError):
+class NoTOSSError(FungeStackError):
     """Exception raised when there is no TOSS, when it should be presented"""
 
-    def __init__(self, message, space):
-        command = space.space
+    def __init__(self, command, space):
+        self.message = f"There is no top of stack stack"
+        super().__init__(command, self.message, space)
 
 
-class NoSOSSError(FungeError):
+class NoSOSSError(FungeStackError):
     """Exception raised when there is no SOSS, when it should be presented"""
 
+    def __init__(self, command, space):
+        self.message = f"There is no second of stack stack"
+        super().__init__(command, self.message, space)
+
+
+class FungeError(Exception):
+    """Parent exception for any Funge-98 errors"""
+
     def __init__(self, message, space):
-        command = space.space
+        self.message = "Funge-98 isn't correct.\n" + message
+        super().__init__(self.message)
+
+
+class IncorrectPositionError(FungeError):
+    """Exception raised when position tuple has wrong format"""
+
+    def __init__(self, key, space):
+        self.message = f"The key {key} has wrong format or wrong length"
+        super().__init__(self.message, space)
+
 
 class IncorrectCommandError(FungeError):
     """Exception raised when wrong command is passed into internal function"""
 
-    def __init__(self, command):
-        self.message = f"The command [{command}] had not been implemented"
-        super().__init__(self.message)
+    def __init__(self, command, space):
+        self.message = (f"The command [{command}] isn't correct at"
+                        f"{space[space.ip_pos]}")
+        super().__init__(self.message, space)
+
+
+class NotImplementedCommandError(IncorrectCommandError):
+    """Exception raised when command has not been implemented"""
+
+    def __init__(self, command, space):
+        self.message = f"The command [{command}] has not been implemented"
+        super().__init__(self.message, space)
