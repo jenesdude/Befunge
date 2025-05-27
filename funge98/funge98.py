@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 from typing import List
 from funge98_exceptions import *
 
@@ -126,7 +127,7 @@ class FungeStack:
     }
 
 
-class FungeSpace:
+class FungeSpace(ABC):
     """Class for Funge Space"""
     def __init__(self, dimension):
         self.stack = FungeStack(dimension)
@@ -138,6 +139,24 @@ class FungeSpace:
         self.space = None
         self.string_mode = False
         self.comment_mode = False
+
+    @abstractmethod
+    def __getitem__(self, key: int | tuple):
+        pass
+
+    def getitem(self, key: int | tuple):
+        # TODO may be check_getitem
+        if not self.space:
+            raise SpaceIsNotDefinedError from None
+        if isinstance(key, tuple):
+            if len(key) != self.dimension:
+                raise IncorrectPositionError(key, self.space) from None
+        elif isinstance(key, int):
+            if key < 0:
+                raise IncorrectPositionError(key, self.space) from None
+        else:
+            raise IncorrectPositionError(key, self.space) from None
+        self.__getitem__(key)
 
     @staticmethod
     def _read_source(mode="f", dimension=2, source=None):
@@ -257,13 +276,18 @@ class FungeSpace:
         return True
 
 
-class UnefungeSpace:
-    """Class for Unefunge Space with Funge98 specification"""
+
+class UnefungeSpace(FungeSpace):
+    """Class for Unefunge Space with Funge-98 specification"""
     def __init__(self):
         super().__init__(1)
         self.space = [" " * 256]
         self.delta = [1]
         self.string_mode = False
+
+    def __getitem__(self, key: int):
+        self.getitem(key)
+        return self.space[key]
 
 
 class BefungeSpace(FungeSpace):
@@ -271,8 +295,17 @@ class BefungeSpace(FungeSpace):
     def __init__(self):
         super().__init__(2)
 
+    def __getitem__(self, key: tuple[int] | list[int]):
+        self.getitem(key)
+        return self.space[key[0]][key[1]]
 
-class TrefungeSpace:
-    """Class for Trefunge Space with Funge98 specification"""
+
+class TrefungeSpace(FungeSpace):
+    """Class for Trefunge Space with Funge-98 specification"""
     def __init__(self):
         super().__init__(3)
+        # TODO
+
+    def __getitem__(self, key: tuple[int] | list[int]):
+        self.getitem(key)
+        return self.space[key[0]][key[1]][key[0]]
