@@ -257,13 +257,33 @@ class FungeSpace(ABC):
             return
 
     def evaluate(self, command, debug):
-        """Main method for evaluation code of Funge98."""
+        """Main method for evaluation code of Funge-98.
+        If debug=True, every evaluation prints:
+         - current command,
+         - instruction pointer's position,
+         - dimensions,
+         - delta to instruction pointer,
+         - current storage offset,
+         - string mode,
+         - comment mode,
+         - full stack"""
         if debug:
-            # TODO
-            pass
+            print("Evaluate command [ {} ] at [ {} ] ({} dimension);"
+                  "delta [ {} ]; storage offset: {};"
+                  "string mode: {}; comment mode: {}; stack: {}".format
+                  (command,
+                   ", ".join(map(str, self.ip_pos)),
+                   self.dimension,
+                   ", ".join(map(str, self.delta)),
+                   self.storage_offset,
+                   self.string_mode,
+                   self.comment_mode,
+                   self.stack))
         if self.string_mode:
-            if command in '" ':
+            if command == '"':
                 self.string_mode = False
+            elif command == " ":
+                pass
             else:
                 self.stack.push(command)
         elif command in ">^<v|_?#|[]hjlmrvwx ":
@@ -275,6 +295,14 @@ class FungeSpace(ABC):
         self._move()
         return True
 
+    def run(self, debug=False):
+        """Endless loop of Funge-98 program interpretation"""
+        if self.space is None:
+            raise SpaceIsNotDefinedError from None
+        while True:
+            if self.evaluate(self.space[self.ip_pos], debug):
+                continue
+            break
 
 
 class UnefungeSpace(FungeSpace):
@@ -291,9 +319,10 @@ class UnefungeSpace(FungeSpace):
 
 
 class BefungeSpace(FungeSpace):
-    """Class for Befunge Space with Funge98 specification"""
+    """Class for Befunge Space with Funge-98 specification"""
     def __init__(self):
         super().__init__(2)
+        # TODO
 
     def __getitem__(self, key: tuple[int] | list[int]):
         self.getitem(key)
