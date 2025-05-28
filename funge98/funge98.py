@@ -160,14 +160,20 @@ class FungeSpace(ABC):
 
     @staticmethod
     @abstractmethod
-    def _read_source(mode="f", source=None):
+    def _read_source(mode="f", source=None) -> (str, int):
         """Inner method for reading source. Either file in "f" mode
         or string, list of strings or list of lists of strings in "s" mode.
         Returns space and list of dimensions length according to dimenions"""
 
-    @abstractmethod
     def set_space(self, mode="f", source=None):
         """Method for setting the space."""
+        source_code, dimensions = self._read_source(mode, source)
+        if 0 in dimensions:
+            raise CodeSourceIsEmptyError from None
+        if max(dimensions) > 256:
+            raise CodeFileIsOutOfBoundsError from None
+        self.space = source_code
+        self.code_dimensions = dimensions
 
     @abstractmethod
     def _move(self):
@@ -290,7 +296,7 @@ class UnefungeSpace(FungeSpace):
         return self.space[key]
 
     @staticmethod
-    def _read_source(mode="f", source=None) -> (str, int):
+    def _read_source(mode="f", source=None):
         """Inner method for reading source.
         Source is either file in "f" mode or string in "s" mode.
         Return space and its maximum dimensions"""
@@ -304,12 +310,9 @@ class UnefungeSpace(FungeSpace):
         elif mode == "s":
             if not isinstance(source, str):
                 raise CodeSourceInappropriateFormatError from None
-            return source, len(source)
+            return source, [len(source)]
         else:
             raise SetSpaceWrongModeError(mode) from None
-
-    def set_space(self, mode="f", source=None):
-        pass
 
     def _move(self):
         pass
@@ -348,9 +351,6 @@ class BefungeSpace(FungeSpace):
             return source, dimensions
         else:
             raise SetSpaceWrongModeError(mode) from None
-
-    def set_space(self, mode="f", source=None):
-        pass
 
     def _move(self):
         pass
@@ -391,9 +391,6 @@ class TrefungeSpace(FungeSpace):
             return source, len(source)
         else:
             raise SetSpaceWrongModeError(mode) from None
-
-    def set_space(self, mode="f", source=None):
-        pass
 
     def _move(self):
         pass
