@@ -188,7 +188,7 @@ class FungeSpace(ABC):
     def reflect(self):
         self.delta = list(map(lambda a: a * -1, self.delta))
 
-    def stack_stack_manipulation(self, command):
+    def _stack_stack_manipulation(self, command):
         try:
             if command == "{":
                 self.begin_block()
@@ -268,8 +268,15 @@ class FungeSpace(ABC):
                 pass
             else:
                 self.stack.push(command)
+        elif self.comment_mode:
+            if command == ";":
+                self.comment_mode = False
+            else:
+                pass
         elif command in ">^<v|_?#|[]hjlmrvwx ":
             self._change_direction(command)
+        elif command in "{}u":
+            self._stack_stack_manipulation(command)
         elif command == "@q":
             return False
         else:
