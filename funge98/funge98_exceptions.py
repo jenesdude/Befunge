@@ -1,3 +1,6 @@
+"""All Exceptions for Funge-98 interpreter"""
+
+
 class SpaceAssignmentError(Exception):
     """Parent exception for all space assignments errors"""
 

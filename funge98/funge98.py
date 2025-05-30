@@ -1,3 +1,5 @@
+"""Interpreter for esoteric stack language Funge-98"""
+
 from abc import ABC, abstractmethod
 from typing import List
 from funge98_exceptions import *
