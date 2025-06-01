@@ -1,0 +1,144 @@
+"""All Exceptions for Funge-98 interpreter"""
+
+
+class SpaceAssignmentError(Exception):
+    """Parent exception for all space assignments errors"""
+
+    def __init__(self, message):
+        self.message = "Space assignment isn't correct.\n" + message
+        super().__init__(self.message)
+
+
+class SetSpaceWrongModeError(SpaceAssignmentError):
+    """Exception raised for using wrong setting space mode"""
+
+    def __init__(self, mode):
+        self.message = f"The space setting mode {mode} is wrong, should be" \
+                       "'f' for files or 's' for string list"
+        super().__init__(self.message)
+
+
+class CodeFileIsOutOfBoundsError(SpaceAssignmentError):
+    """Exception raised for code file width or height is more than 256"""
+
+    def __init__(self):
+        self.message = "The Funge-98 code file width or height" \
+                       "is out of 256×256 bounds"
+        super().__init__(self.message)
+
+
+class SpaceFileAssignmentError(SpaceAssignmentError):
+    """Parent exception for assignment space from a file"""
+
+    def __init__(self, message):
+        self.message = "Assignment from file mode.\n" + message
+        super().__init__(self.message)
+
+
+class CodeFileNotFoundError(SpaceFileAssignmentError):
+    """Exception raised for code file is not found"""
+
+    def __init__(self):
+        self.message = "The Funge-98 code file is not found"
+        super().__init__(self.message)
+
+
+class SpaceStringAssignmentError(SpaceAssignmentError):
+    """Parent exception for assignment space from a list of strings"""
+
+    def __init__(self, message):
+        self.message = "Assignment from string mode.\n" + message
+        super().__init__(self.message)
+
+
+class CodeSourceIsEmptyError(SpaceStringAssignmentError):
+    """Exception raised for any input other than list of strings
+    while reading source in 's' mode"""
+
+    def __init__(self):
+        self.message = "Code source contains empty string"
+        super().__init__(self.message)
+
+
+class CodeSourceInappropriateFormatError(SpaceStringAssignmentError):
+    """Exception raised for any input other than string or list of strings
+    depending on dimensions while reading source in 's' mode"""
+
+    def __init__(self):
+        self.message = "Code source is not list of string for mode 's'"
+        super().__init__(self.message)
+
+
+class DimensionNotImplementedError(SpaceStringAssignmentError):
+    """Exception raised for any dimension other than 1, 2, or 3."""
+
+    def __init__(self, dimension):
+        self.message = f"Impl. for {dimension} dimensions doesn't exist"
+        super().__init__(self.message)
+
+
+class SpaceIsNotDefinedError(Exception):
+    """Exception raised for executing any command without assigning space"""
+
+    def __init__(self):
+        self.message = "The Funge-98 space is not defined"
+        super().__init__(self.message)
+
+
+class FungeStackError(Exception):
+    """Parent exception for any FungeStack errors"""
+
+    def __init__(self, command, message, stack):
+        self.message = ("Funge-98 isn't correct.\n"
+                        "{} [ {} ] with stack: {}\n{}".format
+                         (message, command, stack, message))
+        super().__init__(self.message)
+
+
+class NoTOSSError(FungeStackError):
+    """Exception raised when there is no TOSS, when it should be presented"""
+
+    def __init__(self, command, space):
+        self.message = f"There is no top of stack stack"
+        super().__init__(command, self.message, space)
+
+
+class NoSOSSError(FungeStackError):
+    """Exception raised when there is no SOSS, when it should be presented"""
+
+    def __init__(self, command, space):
+        self.message = f"There is no second of stack stack"
+        super().__init__(command, self.message, space)
+
+
+class FungeError(Exception):
+    """Parent exception for any Funge-98 errors"""
+
+    def __init__(self, message, space):
+        self.message = "Funge-98 isn't correct.\n" + message
+        super().__init__(self.message)
+
+
+class IncorrectPositionError(FungeError):
+    """Exception raised when position tuple has wrong format"""
+
+    def __init__(self, key, space):
+        self.message = f"The key {key} has wrong format or wrong length"
+        super().__init__(self.message, space)
+
+
+class IncorrectCommandError(FungeError):
+    """Exception raised when wrong command is passed into internal function"""
+
+    def __init__(self, command, space):
+        self.message = (f"The command [{command}] isn't correct at"
+                        f"{space[space.ip_pos]}")
+        super().__init__(self.message, space)
+
+
+class NotImplementedCommandError(IncorrectCommandError):
+    """Exception raised when command has not been implemented"""
+
+    def __init__(self, command, space):
+        self.message = f"The command [{command}] has not been implemented"
+        super().__init__(self.message, space)
