@@ -2,7 +2,7 @@
 
 from abc import ABC, abstractmethod
 from typing import List
-from funge98_exceptions import *
+from funge98.exceptions import *
 
 
 class FungeStack:
